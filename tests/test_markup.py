@@ -36,9 +36,9 @@ def test_reject_changed_weight(tmp_path):
     ledger = create_ledger(tmp_path)
     file = tmp_path / 'selected.jsonl'
     write_jsonl(ledger, file, {1})
-    records = [json.loads(line) for line in file.read_text().splitlines()]
+    records = [json.loads(line) for line in file.read_text(encoding="utf-8").splitlines()]
     records[1]['slaughter_weight_kg'] = 99.0
-    file.write_text(''.join(json.dumps(record) + '\n' for record in records))
+    file.write_text(''.join(json.dumps(record) + '\n' for record in records), encoding='utf-8')
     with pytest.raises(MarkupError, match='slaughter_weight_kg'):
         read_purchased_jsonl(ledger, file)
 
@@ -47,12 +47,12 @@ def test_reject_wrong_document_and_partial(tmp_path):
     ledger = create_ledger(tmp_path)
     file = tmp_path / 'selected.jsonl'
     write_jsonl(ledger, file, {1})
-    records = [json.loads(line) for line in file.read_text().splitlines()]
+    records = [json.loads(line) for line in file.read_text(encoding="utf-8").splitlines()]
     records[0]['document_date'] = '18.11.2026'
-    file.write_text(''.join(json.dumps(record) + '\n' for record in records))
+    file.write_text(''.join(json.dumps(record) + '\n' for record in records), encoding='utf-8')
     with pytest.raises(MarkupError, match='дата'):
         read_purchased_jsonl(ledger, file)
-    file.write_text(json.dumps(records[2]) + '\n')
+    file.write_text(json.dumps(records[2]) + '\n', encoding='utf-8')
     with pytest.raises(MarkupError, match='Неполная'):
         read_purchased_jsonl(ledger, file)
 
@@ -64,6 +64,6 @@ def test_reject_unlabeled_and_repeated_id(tmp_path):
     with pytest.raises(MarkupError, match='не подтверждена'):
         read_purchased_jsonl(ledger, file)
     write_jsonl(ledger, file, {2})
-    file.write_text(file.read_text() + file.read_text().splitlines()[0] + '\n')
+    file.write_text(file.read_text(encoding="utf-8") + file.read_text(encoding="utf-8").splitlines()[0] + '\n')
     with pytest.raises(MarkupError, match='повтор'):
         read_purchased_jsonl(ledger, file)

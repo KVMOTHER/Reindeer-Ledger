@@ -26,7 +26,7 @@ class Roles:
 
 
 def get_actual_set_data():
-    code = (Path(__file__).resolve().parents[1] / 'main.py').read_text()
+    code = (Path(__file__).resolve().parents[1] / 'main.py').read_text(encoding="utf-8")
     tree = ast.parse(code)
     model = next(node for node in tree.body if isinstance(node, ast.ClassDef)
                  and node.name == 'AnimalModel')

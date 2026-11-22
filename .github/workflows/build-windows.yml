@@ -5,6 +5,10 @@ on:
     tags: ["v0.6.0*"]
 permissions:
   contents: read
+env:
+  PYTHONUTF8: "1"
+  PYTHONIOENCODING: "utf-8"
+
 jobs:
   windows-installer:
     runs-on: windows-2022
@@ -26,6 +30,7 @@ jobs:
         run: |
           python -m PyInstaller --noconfirm --clean --onedir --windowed --name ReindeerLedger --icon assets/app.ico --add-data "assets/kvramis_logo.jpg;assets" --add-data "assets/accounting_template.xlsx;assets" main.py
           if (!(Test-Path dist/ReindeerLedger/ReindeerLedger.exe)) { throw "EXE missing" }
+          if (!(Test-Path dist/ReindeerLedger/_internal/assets/accounting_template.xlsx)) { throw "Accounting template missing from bundle" }
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup --yes --no-progress
