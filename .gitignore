@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build
+build/
+dist/
+*.spec
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local data and reports
+*.jsonl
+*_report.pdf
+*_marked.jsonl
+*_бухгалтерия.xlsx
+
+# Temporary files
+*.tmp
+*.bak
+*.log

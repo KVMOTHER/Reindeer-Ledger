@@ -1,0 +1,44 @@
+name: Build Windows installer (v0.6.0 RC)
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v0.6.0*"]
+permissions:
+  contents: read
+jobs:
+  windows-installer:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements-build.txt
+      - name: Run unit tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pip install pytest
+          python -m pytest -q
+      - name: Build Windows application
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name ReindeerLedger --icon assets/app.ico --add-data "assets/kvramis_logo.jpg;assets" --add-data "assets/accounting_template.xlsx;assets" main.py
+          if (!(Test-Path dist/ReindeerLedger/ReindeerLedger.exe)) { throw "EXE missing" }
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+      - name: Build setup
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (!(Test-Path $iscc)) { throw "Inno Setup compiler missing: $iscc" }
+          & $iscc installer/ReindeerLedger.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (!(Test-Path release/ReindeerLedger_Setup_v0.6.0_RC.exe)) { throw "Installer missing" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ReindeerLedger-v0.6.0-RC-Windows-Setup
+          path: release/ReindeerLedger_Setup_v0.6.0_RC.exe
+          if-no-files-found: error
